@@ -268,3 +268,416 @@ todo-list v-slot="slotProps">
 
   b. 可以检测到数组的下标和length属性的变化
 
+## 5. 生命周期
+
+**vue2.x的生命周期**
+
+<img src="https://raw.githubusercontent.com/cplasf-lixj/photo-album/main/vue2_lifecycle.png" alt="vue2_lifecycle" style="zoom: 33%;" />
+
+**vue3.x的生命周期**
+
+<img src="https://raw.githubusercontent.com/cplasf-lixj/photo-album/main/vue3_lifecycle.png" alt="vue3_lifecycle" style="zoom:33%;" />
+
+### 5.1 与2.x版本生命周期相对应的组合式API
+
+- ~~beforeCreate~~ -> 使用 `setup()`
+- ~~created~~ -> 使用 `setup()`
+- `beforeMount` -> `onBeforeMount`
+- `mounted` -> `onMounted`
+- `beforeUpdate` -> `onBeforeUpdate`
+- `updated` -> `onUpdated`
+- `beforeDestroy` -> `onBeforeUnmount`
+- `destroyed` -> `onUnmounted`
+- `errorCaptured` -> `onErrorCaptured`
+
+## 6. 依赖注入
+
+**2.2 provide/inject 示例**
+
+````javascript
+// 父级组件提供 'foo'
+var Provider = {
+  provide: {
+    foo: 'bar'
+  },
+  // ...
+}
+// 子组件注入 'foo'
+var Child = {
+  inject: ['foo'],
+  created () {
+    console.log(this.foo) // => "bar"
+  }
+  // ...
+}
+````
+
+**3.0 provide/inject 示例**
+
+`provide` 和 `inject` 都只能在当前活动组件实例的 `setup()` 中调用。
+
+````javascript
+import { provide, inject } from 'vue'
+
+const ThemeSymbol = Symbol()
+const Ancestor = {
+  setup() {
+    provide(ThemeSymbol, 'dark')
+  },
+}
+
+const Descendent = {
+  setup() {
+    const theme = inject(ThemeSymbol, 'light' /* optional default value */)
+    return {
+      theme,
+    }
+  },
+}
+````
+
+### 6.1 处理响应性
+
+默认情况下，`provide/inject`绑定*不是*b被动绑定，所以值的修改不会反映在注入的对象中。可以通过将`ref`property或`reactive`对象传递给`provide`来实现响应式；还可以使用过组合式API`computed`property实现。
+
+**ref 或 reactive 方式**
+
+````javascript
+// 提供者：
+const themeRef = ref('dark')
+provide(ThemeSymbol, themeRef)
+
+// 使用者：
+const theme = inject(ThemeSymbol, ref('light'))
+watchEffect(() => {
+  console.log(`theme set to: ${theme.value}`)
+})
+````
+
+**computed方式**
+
+````javascript
+// 提供者：
+const todos = ['Feed a cat', 'Buy tickets']
+const todoLength = computed(() => todos.length)
+````
+
+## 7. 混入
+
+混入(mixin)封装Vue组件中的可复用功能。当组件使用混入对象，所有混入对象的选项被“混合”到组件自身中。
+
+### 7.1 基础
+
+```js
+// define a mixin object
+const myMixin = {
+  created() {
+    this.hello()
+  },
+  methods: {
+    hello() {
+      console.log('hello from mixin!')
+    }
+  }
+}
+
+// define an app that uses this mixin
+const app = Vue.createApp({
+  mixins: [myMixin]
+})
+
+app.mount('#mixins-basic') // => "hello from mixin!"
+```
+
+### 7.2 选项合并
+
+当组件和混入对象含有同名选项时，默认按照如下方式进行合并：
+
+* 数据对象同名：组件数据优先。
+* 钩子函数同名：钩子函数合并为一个数组，混入对象的钩子先调用，然后再调用组件自身的钩子。
+* 值为对象：如`methods`、`components`和`directives`，将被合并为同一个对象。同名对象的键名冲突时，优先取组件对象的键值对。
+
+````javascript
+const myMixin = {
+  methods: {
+    foo() {
+      console.log('foo')
+    },
+    conflicting() {
+      console.log('from mixin')
+    }
+  }
+}
+
+const app = Vue.createApp({
+  mixins: [myMixin],
+  methods: {
+    bar() {
+      console.log('bar')
+    },
+    conflicting() {
+      console.log('from self')
+    }
+  }
+})
+
+const vm = app.mount('#mixins-basic')
+
+vm.foo() // => "foo"
+vm.bar() // => "bar"
+vm.conflicting() // => "from self"
+````
+
+### 7.3 自定义选项合并策略
+
+自定义选项将使用默认策略，即简单的覆盖已有值。通过向`app.config.optionMergeStrategies`添加函数实现自定义合并逻辑：
+
+```js
+const app = Vue.createApp({})
+
+app.config.optionMergeStrategies.customOption = (toVal, fromVal) => {
+  // return mergedVal
+}
+```
+
+## 8. 自定义指令(Vue3.x)
+
+### 8.1 注册指令
+
+#### 8.1.1 全局注册
+
+````javascript
+const app = Vue.createApp({})
+// 注册一个全局的自定义指令'v-focus'
+app.directive('focus', {
+  // 当被绑定的元素插入到 DOM 中时……
+  mounted(el) {
+    // Focus the element
+    el.focus()
+  }
+})
+````
+
+#### 8.1.2 局部注册
+
+````javascript
+export default defineComponent({
+  directives: {
+    focus: {
+      // 指令的定义
+      mounted(el) {
+        el.focus()
+      }
+    }
+  }
+});
+````
+
+### 8.2 指令的钩子函数
+
+```js
+import { createApp } from 'vue'
+const app = createApp({})
+
+// 注册
+app.directive('my-directive', {
+  // 指令是具有一组生命周期的钩子：
+  // 在绑定元素的父组件挂载之前调用，可以做一次性初始化设置
+  beforeMount() {},
+  // 绑定元素的父组件挂载时调用
+  mounted() {},
+  // 在包含组件的 VNode 更新之前调用
+  beforeUpdate() {},
+  // 在包含组件的 VNode 及其子组件的 VNode 更新之后调用
+  updated() {},
+  // 在绑定元素的父组件卸载之前调用
+  beforeUnmount() {},
+  // 卸载绑定元素的父组件时调用
+  unmounted() {}
+})
+
+// 注册 (功能指令) => 函数简写
+app.directive('my-directive', () => {
+  // 这将被作为 `mounted` 和 `updated` 调用
+})
+
+// getter, 如果已注册，则返回指令定义
+const myDirective = app.directive('my-directive')
+```
+
+指令钩子的参数说明：
+
+**el**
+
+指令绑定到的元素，可用于DOM操作。
+
+**binding**
+
+包含以下property的对象。
+
+* `instance`：使用指令的组件实例
+
+* `value`：传递给指令的值。 如，`v-my-directive="1 + 1"`中，value为2.
+
+* `oldValue`：旧值， 仅在`beforeUpdate`和`updated`中可用。
+
+* `arg`：传递给指令的参数(如果有)。如，`v-my-directive:foo`中，arg为"foo"。
+
+* `modifiers`：包含修饰符的对象(如果有)。 如，`v-my-directive.foo.bar`中，修饰符对象为`{foo: true, bar: true}`
+
+* `dir`：注册指令时作为参数传递的*对象*。如：
+
+  ````javascript
+  app.directive('focus', {
+    mounted(el) {
+      el.focus()
+    }
+  })
+  
+  // dir对象为：
+  {
+    mounted(el) {
+      el.focus()
+    }
+  }
+  ````
+
+#### 8.2.1 动态指令参数
+
+通过`v-mydirective:[argment]="value"`语法可以灵活更新自定义指令的`argment`参数。
+
+````vue
+<template>
+	<p v-pin="200">Stick me 200px from the top of the page</p>
+</template>
+
+<script lang='ts'>
+import { defineComponent } from 'vue'
+export default defineComponent({
+	directive:{
+  	pin: {
+      mounted(el, binding) {
+    		el.style.position = 'fixed'
+    		el.style.top = binding.value + 'px'
+  		}
+    }
+	}
+})
+</script>
+````
+
+该例子会把元素固定在距离顶部200像素的位置。实际的使用场景很可能是左侧或者右侧，这样的话，就需要动态参数对组件实例进行更新。
+
+````vue
+<template>
+	<p v-pin:[direction]="200">Stick me 200px from the top of the page</p>
+</template>
+
+<script lang='ts'>
+import { defineComponent } from 'vue'
+export default defineComponent({
+	directive:{
+  	pin: {
+      mounted(el, binding) {
+    		el.style.position = 'fixed'
+        // 获取指令的参数
+        const s = binding.arg || 'top'
+    		el.style[s] = binding.value + 'px'
+  		}
+    }
+	},
+  setup() {
+    const direction = 'right'
+    return {
+      direction
+    }
+  }
+})
+</script>
+````
+
+还可以通过修改绑定值让定制指令更灵活。
+
+````vue
+<template>
+	<p v-pin:[direction]="pinPadding">Stick me 200px from the top of the page</p>
+</template>
+
+<script lang='ts'>
+import { defineComponent } from 'vue'
+export default defineComponent({
+	directive:{
+  	pin: {
+      mounted(el, binding) {
+    		el.style.position = 'fixed'
+        // 获取指令的参数
+        const s = binding.arg || 'top'
+    		el.style[s] = binding.value + 'px'
+  		},
+      // 增加updated钩子，当值更新时重新计算元素的距离
+      updated(el, binding) {
+        const s = binding.arg || 'top'
+    		el.style[s] = binding.value + 'px'
+      }
+    }
+	},
+  setup() {
+    const direction = 'right'
+    const pinPadding = 200
+    return {
+      direction,
+      pinPadding
+    }
+  }
+})
+</script>
+````
+
+上面的代码可以简写如下：
+
+````vue
+<template>
+	<p v-pin:[direction]="pinPadding">Stick me 200px from the top of the page</p>
+</template>
+
+<script lang='ts'>
+import { defineComponent } from 'vue'
+export default defineComponent({
+	directive:{
+    pin: (el, binding) => {
+      // `mounted` 和 `updated` 调用
+      el.style.position = 'fixed'
+  		const s = binding.arg || 'top'
+  		el.style[s] = binding.value + 'px'
+    }
+	},
+  setup() {
+    const direction = 'right'
+    const pinPadding = 200
+    return {
+      direction,
+      pinPadding
+    }
+  }
+})
+</script>
+````
+
+#### 8.2.2 传入多个值
+
+````vue
+<div v-demo="{color: 'white', text: 'hello'}"></div>
+
+<script lang='ts'>
+import { defineComponent } from 'vue'
+export default defineComponent({
+	directive:{
+    demo: (el, binding) => {
+      console.log(binding.value.color) // => "white"
+  		console.log(binding.value.text) // => "hello!"
+    }
+	}
+})
+</script>
+````
+
