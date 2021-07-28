@@ -475,3 +475,118 @@ store.state.a // -> moduleA 的状态
 store.state.b // -> moduleB 的状态
 ```
 
+#### 2.5.1 模块内部的状态
+
+##### 2.5.1.1 局部状态
+
+模块内部的`mutation`和`getter`，第一个参数为**`模块的局部状态对象`**，`action`的局部状态通过`context.state`暴露出来。
+
+````js
+const moduleA = {
+  state: () => ({
+    count: 0
+  }),
+  mutations: {
+    increment (state) {
+      // 这里的 `state` 对象是模块的局部状态
+      state.count++
+    }
+  },
+
+  getters: {
+    doubleCount (state) {
+      return state.count * 2
+    }
+  },
+  
+  actions: {
+    incrementIfOddOnRootSum ({ state, commit }) {
+      commit('increment')
+    }
+  }
+}
+````
+
+##### 2.5.1.2 根节点状态
+
+模块内部的action的根节点状态为`context.rootState`暴露出来
+
+````js
+const moduleA = {
+  // ...
+  actions: {
+    incrementIfOddOnRootSum ({ state, commit, rootState }) {
+      if ((state.count + rootState.count) % 2 === 1) {
+        commit('increment')
+      }
+    }
+  }
+}
+````
+
+模块内部的getter的根节点状态作为第三个参数暴露出来(第二个参数为其他getter)
+
+````js
+const moduleA = {
+  // ...
+  getters: {
+    sumWithRootCount (state, getters, rootState) {
+      return state.count + rootState.count
+    }
+  }
+}
+````
+
+#### 2.5.2 命名空间
+
+参考[官网文档](https://vuex.vuejs.org/zh/guide/modules.html#%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4)
+
+## 3. 进阶
+
+### 3.1 项目结构
+
+Vuex 规定了一些需要遵守的规则：
+
+1. 应用层级的状态应该集中到单个 store 对象中。
+2. 提交 **mutation** 是更改状态的唯一方法，并且这个过程是同步的。
+3. 异步逻辑都应该封装到 **action** 里面。
+
+项目结构示例：
+
+```sh
+├── index.html
+├── main.js
+├── api
+│   └── ... # 抽取出API请求
+├── components
+│   ├── App.vue
+│   └── ...
+└── store
+    ├── index.js          # 我们组装模块并导出 store 的地方
+    ├── actions.js        # 根级别的 action
+    ├── mutations.js      # 根级别的 mutation
+    └── modules
+        ├── cart.js       # 购物车模块
+        └── products.js   # 产品模块
+```
+
+参考[购物车示例](https://github.com/vuejs/vuex/tree/dev/examples/shopping-cart)
+
+### 3.2 插件
+
+
+
+### 3.3 严格模式
+
+
+
+### 3.4 表单处理
+
+
+
+### 3.5 测试
+
+
+
+### 3.6 热重载
+
