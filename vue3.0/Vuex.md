@@ -158,14 +158,7 @@ store.getters.doneTodosCount // -> 1
 通过让 getter 返回一个函数，来实现给 getter 传参.
 
 ```js
-getters: {
-  // ...
-  getTodoById: (state) => (id) => {
-    return state.todos.find(todo => todo.id === id)
-  }
-}
-
-store.getters.getTodoById(2) // -> { id: 2, text: '...', done: false }
+getters: {  // ...  getTodoById: (state) => (id) => {    return state.todos.find(todo => todo.id === id)  }}store.getters.getTodoById(2) // -> { id: 2, text: '...', done: false }
 ```
 
 **注意，getter 在通过方法访问时，每次都会去进行调用，而不会缓存结果。**
@@ -175,28 +168,13 @@ store.getters.getTodoById(2) // -> { id: 2, text: '...', done: false }
 `mapGetters` 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性：
 
 ```js
-import { mapGetters } from 'vuex'
-
-export default {
-  // ...
-  computed: {
-  // 使用对象展开运算符将 getter 混入 computed 对象中
-    ...mapGetters([
-      'doneTodosCount',
-      'anotherGetter',
-      // ...
-    ])
-  }
-}
+import { mapGetters } from 'vuex'export default {  // ...  computed: {  // 使用对象展开运算符将 getter 混入 computed 对象中    ...mapGetters([      'doneTodosCount',      'anotherGetter',      // ...    ])  }}
 ```
 
 如果想将一个 getter 属性另取一个名字，使用对象形式：
 
 ```js
-...mapGetters({
-  // 把 `this.doneCount` 映射为 `this.$store.getters.doneTodosCount`
-  doneCount: 'doneTodosCount'
-})
+...mapGetters({  // 把 `this.doneCount` 映射为 `this.$store.getters.doneTodosCount`  doneCount: 'doneTodosCount'})
 ```
 
 ### 2.3 Mutations
@@ -208,18 +186,7 @@ export default {
 更改 Vuex 的 store 中的状态的唯一方法是提交 mutation。Vuex 中的 mutation 非常类似于事件：每个 mutation 都有一个字符串的**事件类型 (type)\**和一个\**回调函数 (handler)**
 
 ```js
-const store = createStore({
-  state: {
-    count: 1
-  },
-  mutations: {
-		// 回调函数接受 state 作为第一个参数
-    increment (state) {
-      // 变更状态
-      state.count++
-    }
-  }
-})
+const store = createStore({  state: {    count: 1  },  mutations: {		// 回调函数接受 state 作为第一个参数    increment (state) {      // 变更状态      state.count++    }  }})
 ```
 
 #### 2.3.2 变更方式
@@ -235,14 +202,7 @@ store.commit('increment')
 可以向 `store.commit` 传入额外的参数，即 mutation 的**载荷（payload）**
 
 ```js
-// ...
-mutations: {
-  increment (state, n) {
-    state.count += n
-  }
-}
-
-store.commit('increment', 10)
+// ...mutations: {  increment (state, n) {    state.count += n  }}store.commit('increment', 10)
 ```
 
 当载荷包含多个自动时，载荷应是一个对象，这样也更已读：
@@ -574,19 +534,99 @@ Vuex 规定了一些需要遵守的规则：
 
 ### 3.2 插件
 
-
+[插件](https://vue3js.cn/vuex/zh/guide/plugins.html#%E6%8F%92%E4%BB%B6)
 
 ### 3.3 严格模式
 
+在严格模式下，无论何时发生了状态变更且不是由 mutation 函数引起的，将会抛出错误。这能保证所有的状态变更都能被调试工具跟踪到。
 
+开启严格模式，仅需在创建 store 的时候传入 `strict: true`：
+
+```js
+const store = new Vuex.Store({
+  // ...
+  strict: true
+})
+```
+
+**不要在发布环境下启用严格模式！**
+
+严格模式会深度监测状态树来检测不合规的状态变更，发布环境关闭严格模式，避免性能损失。
+
+```js
+const store = new Vuex.Store({
+  // ...
+  strict: process.env.NODE_ENV !== 'production'
+})
+```
 
 ### 3.4 表单处理
 
+```html
+<!-- 假设 obj 是在计算属性中返回的Vuex store对象 -->
+<input v-model="obj.message">
+```
 
+在严格模式下，上面的代码会抛出错误。当用户输入时，`v-model`会试图直接修改`obj.message`，此修改并不是在mutation函数中执行的。
+
+解决办法：
+
+1. 用“Vuex的思维”给`input`绑定一个value，并侦听`input`或者`change`事件，在事件回调中调用方法：
+
+````vue
+<input :value="message" @input="updateMessage">
+
+<script lang='ts'>
+  // ...
+  computed: {
+    ...mapState({
+      message: state => state.obj.message
+    })
+  },
+  methods: {
+    updateMessage (e) {
+      this.$store.commit('updateMessage', e.target.value)
+    }
+  }
+</script>
+````
+
+mutation函数：
+
+```js
+// ...
+mutations: {
+  updateMessage (state, message) {
+    state.obj.message = message
+  }
+}
+```
+
+2. 双向绑定的计算属性
+
+````vue
+<input v-model="message">
+
+<script lang='ts'>
+	// ...
+  computed: {
+    message: {
+      get () {
+        return this.$store.state.obj.message
+      },
+      set (value) {
+        this.$store.commit('updateMessage', value)
+      }
+    }
+  }
+</script>
+````
 
 ### 3.5 测试
 
-
+[mutation、action和getter的单元测试](https://vue3js.cn/vuex/zh/guide/testing.html#%E6%B5%8B%E8%AF%95)
 
 ### 3.6 热重载
+
+[热重载](https://vue3js.cn/vuex/zh/guide/hot-reload.html#%E7%83%AD%E9%87%8D%E8%BD%BD)
 

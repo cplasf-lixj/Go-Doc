@@ -2,15 +2,7 @@
 
 
 
-## 1、v-if和v-show的区别
-
-`v-if`是“真正的”条件渲染，条件切换时，条件块内的事件监听器和子组件会被适当的销毁或重建。同时，`v-if`只会在条件第一次为真的时候渲染条件块，为假的时候什么都不做。
-
-`v-show`的元素始终会被渲染在DOM中，通过切换CSS的`display` property控制元素的显示与否。
-
-`v-if`切换开销更高，`v-show`渲染开销更高。因此，如果频繁切换时，使用`v-show`较好；条件变化很少时，使用`v-if`较好。
-
-## 2、事件修饰符详解
+## 1、事件修饰符详解
 
 • `.stop` 阻止事件冒泡，即不允许当前元素的事件继续往外触发
 
@@ -54,7 +46,7 @@
 <div @scroll.passive="onScroll">...</div>
 ````
 
-## 3、插槽
+## 2、插槽
 
 在封装的组件中放置`<slot>`元素，当组件渲染时，用组件嵌套的内容替换`<slot>`元素。
 
@@ -81,7 +73,7 @@
 </button>
 ````
 
-### 3.1 后备内容
+### 2.1 后备内容
 
 后备内容即组件插槽的默认内容。如在`<submit-button>`组件中设置后备内容:
 
@@ -122,7 +114,7 @@
 </button>
 ```
 
-### 3.2 具名插槽
+### 2.2 具名插槽
 
 当有多个插槽时，可以通过`<slot>`元素的attribute：`name`命名插槽。如`<base-layout>` 组件：
 
@@ -177,7 +169,7 @@
 </div>
 ```
 
-### 3.3 独占默认插槽的缩写语法
+### 2.3 独占默认插槽的缩写语法
 
 当组件只有默认插槽时，组件的标签可以被当做插槽的模板来使用，可以把`v-slot`直接用在组件上：
 
@@ -195,7 +187,7 @@ todo-list v-slot="slotProps">
 </todo-list>
 ```
 
-### 3.4 结构插槽Prop
+### 2.4 结构插槽Prop
 
 ```html
 // 作用域插槽的内部工作原理是将你的插槽内容包括在一个传入单个参数的函数里
@@ -207,7 +199,7 @@ todo-list v-slot="slotProps">
 </todo-list>
 ```
 
-### 3.5 具名插槽的缩写
+### 2.5 具名插槽的缩写
 
 ```html
 // 跟 v-on 和 v-bind 一样，v-slot 也有缩写，即把参数之前的所有内容 (v-slot:) 替换为字符 #。
@@ -230,11 +222,11 @@ todo-list v-slot="slotProps">
 
 
 
-## 4、Vue2.0和Vue3.0的区别
+## 3、Vue2.0和Vue3.0的区别
 
-### 4.1 响应式数据原理
+### 3.1 响应式数据原理
 
-#### 4.1.1 Vue2.0
+#### 3.1.1 Vue2.0
 
 * Vue2使用Object.defineProperty方法实现响应式数据，在初始化数据时，使用Object.defineProperty重新定义data中所有属性，当页面使用对应属性时，首先会进行依赖收集(收集当前组件的watcher)，如果属性发生变化会通过通知相关依赖进行更新操作。
 
@@ -252,7 +244,7 @@ todo-list v-slot="slotProps">
 
   重写数组的方法，检测数组变更
 
-#### 4.1.2 Vue3.0
+#### 3.1.2 Vue3.0
 
 * Vue3使用Proxy实现响应式数据，Proxy可以直接监听对象和数组的变化，并且作为新标准将受到浏览器厂商重点持续的性能优化。
 
@@ -268,7 +260,7 @@ todo-list v-slot="slotProps">
 
   b. 可以检测到数组的下标和length属性的变化
 
-## 5. 生命周期
+## 4. 生命周期
 
 **vue2.x的生命周期**
 
@@ -278,7 +270,7 @@ todo-list v-slot="slotProps">
 
 <img src="https://raw.githubusercontent.com/cplasf-lixj/photo-album/main/vue3_lifecycle.png" alt="vue3_lifecycle" style="zoom:33%;" />
 
-### 5.1 与2.x版本生命周期相对应的组合式API
+### 4.1 与2.x版本生命周期相对应的组合式API
 
 - ~~beforeCreate~~ -> 使用 `setup()`
 - ~~created~~ -> 使用 `setup()`
@@ -290,7 +282,7 @@ todo-list v-slot="slotProps">
 - `destroyed` -> `onUnmounted`
 - `errorCaptured` -> `onErrorCaptured`
 
-## 6. 依赖注入
+## 5. 依赖注入
 
 **2.2 provide/inject 示例**
 
@@ -336,7 +328,7 @@ const Descendent = {
 }
 ````
 
-### 6.1 处理响应性
+### 5.1 处理响应性
 
 默认情况下，`provide/inject`绑定*不是*b被动绑定，所以值的修改不会反映在注入的对象中。可以通过将`ref`property或`reactive`对象传递给`provide`来实现响应式；还可以使用过组合式API`computed`property实现。
 
@@ -362,11 +354,11 @@ const todos = ['Feed a cat', 'Buy tickets']
 const todoLength = computed(() => todos.length)
 ````
 
-## 7. 混入
+## 6. 混入
 
 混入(mixin)封装Vue组件中的可复用功能。当组件使用混入对象，所有混入对象的选项被“混合”到组件自身中。
 
-### 7.1 基础
+### 6.1 基础
 
 ```js
 // define a mixin object
@@ -389,7 +381,7 @@ const app = Vue.createApp({
 app.mount('#mixins-basic') // => "hello from mixin!"
 ```
 
-### 7.2 选项合并
+### 6.2 选项合并
 
 当组件和混入对象含有同名选项时，默认按照如下方式进行合并：
 
@@ -428,7 +420,7 @@ vm.bar() // => "bar"
 vm.conflicting() // => "from self"
 ````
 
-### 7.3 自定义选项合并策略
+### 6.3 自定义选项合并策略
 
 自定义选项将使用默认策略，即简单的覆盖已有值。通过向`app.config.optionMergeStrategies`添加函数实现自定义合并逻辑：
 
@@ -440,11 +432,11 @@ app.config.optionMergeStrategies.customOption = (toVal, fromVal) => {
 }
 ```
 
-## 8. 自定义指令(Vue3.x)
+## 7. 自定义指令(Vue3.x)
 
-### 8.1 注册指令
+### 7.1 注册指令
 
-#### 8.1.1 全局注册
+#### 7.1.1 全局注册
 
 ````javascript
 const app = Vue.createApp({})
@@ -458,7 +450,7 @@ app.directive('focus', {
 })
 ````
 
-#### 8.1.2 局部注册
+#### 7.1.2 局部注册
 
 ````javascript
 export default defineComponent({
@@ -473,7 +465,7 @@ export default defineComponent({
 });
 ````
 
-### 8.2 指令的钩子函数
+### 7.2 指令的钩子函数
 
 ```js
 import { createApp } from 'vue'
@@ -542,7 +534,7 @@ const myDirective = app.directive('my-directive')
   }
   ````
 
-#### 8.2.1 动态指令参数
+#### 7.2.1 动态指令参数
 
 通过`v-mydirective:[argment]="value"`语法可以灵活更新自定义指令的`argment`参数。
 
@@ -663,7 +655,7 @@ export default defineComponent({
 </script>
 ````
 
-#### 8.2.2 传入多个值
+#### 7.2.2 传入多个值
 
 ````vue
 <div v-demo="{color: 'white', text: 'hello'}"></div>
