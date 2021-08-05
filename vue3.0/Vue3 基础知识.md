@@ -673,3 +673,20 @@ export default defineComponent({
 </script>
 ````
 
+## 8. 自定义字体
+
+* 在public/static目录下新建fonts目录，将字体放入该文件夹
+
+* 在assets/style目录下新建font.css文件
+
+  ````css
+  @font-face {
+    font-family: 'Bebas';
+    font-display: auto;
+    src: local('Bebas'), url('/static/fonts/BEBAS.woff2');
+  }
+  ````
+
+* 在main.ts或者APP.vue文件中引入font.css
+
+* 使用自定义字体即可。
