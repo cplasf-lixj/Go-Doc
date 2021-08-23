@@ -8,7 +8,7 @@
 
 ### 2.1 Dom-Diff的原理
 
-![react-dom-diff](/Users/lixiangju87/Documents/TecDoc/Tec-Doc/react/react-dom-diff.png)
+![react-dom-diff](https://raw.githubusercontent.com/cplasf-lixj/photo-album/main/react-dom-diff.png)
 
 setState()更新状态 --> 重新创建虚拟DOM树 --> 新/旧树比较差异 --> 更新差异对应真实DOM --> 举办界面重绘
 
@@ -22,11 +22,11 @@ setState()更新状态 --> 重新创建虚拟DOM树 --> 新/旧树比较差异 -
 
 ​	`react`只会对同一层级的节点进行比较，当发现节点不存在时，删除整个节点及其子节点，不会再进行必须，这样只需要遍历一次，就能完成整个DOM树的比较
 
-​	![tree-diff-1](/Users/lixiangju87/Documents/TecDoc/Tec-Doc/react/tree-diff-1.png)
+​	![tree-diff-1](https://raw.githubusercontent.com/cplasf-lixj/photo-album/main/tree-diff-1.png)
 
 ​	如果出现DOM节点的跨层级的移动操作，React会简单的考虑同层级节点的位置变换，对于不同层级的节点，只有创建和删除操作。如，A节点整个被移动到D节点下，根节点发现子节点中A不见了，就会销毁A；然后D发现自己多了一个子节点，就会创建新的子节点及其子节点作为其子节点。`react diff`就会按照这样的次序执行: ` create a -> create b -> create c -> delete a`。这种跨层级的节点移动，并不会出现移动的情况，而是会有创建、删除操作。*这种操作会影响到React的性能，因此React官方不建议进行这种操作*。在开发组件时，保持稳定的dom结构会有助于性能的提升。
 
-![tree-diff-2](/Users/lixiangju87/Documents/TecDoc/Tec-Doc/react/tree-diff-2.png)
+![tree-diff-2](https://raw.githubusercontent.com/cplasf-lixj/photo-album/main/tree-diff-2.png)
 
 #### 2.2.2 component diff
 
@@ -40,5 +40,5 @@ setState()更新状态 --> 重新创建虚拟DOM树 --> 新/旧树比较差异 -
 
 举例来说，当下图中`componet D`改变为`component G`时，即使这两个component结构相似，`react`会判断D和G并不是同类型组件，也就不会比较两者的结构了，而是直接删除D，重新创建G及其子节点。*这是会影响react的性能*。
 
-​	![component-diff](/Users/lixiangju87/Documents/TecDoc/Tec-Doc/react/component-diff.png)
+​	![component-diff](https://raw.githubusercontent.com/cplasf-lixj/photo-album/main/component-diff.png)
 
