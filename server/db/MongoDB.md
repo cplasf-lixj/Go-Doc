@@ -157,39 +157,3 @@ mongodb://[username:password@]host1[:port1][,host2[:port2]][,...][,hostN[:portN]
 # ?options							连接项，如果不只用/database,则前面加上/。选项为键值对name=value,键值对通过&或;隔开
 ````
 
-## 5. MongoDB的CRUD
-
-### 5.1 Create
-
-`db.collection.insertOne()`			 向集合中插入单个文档
-
-`db.collection.insertMany()`			向集合中插入多个文档
-
-`db.collection.insert()`					向文档中插入单个或多个文档
-
-当选项中`upsert:true`时，以下方法也可以向集合中插入新文档
-
-`db.collection.update()`					
-
-`db.collection.updateOne()`
-
-`db.collection.updateMany()`
-
-`db.collection.findAndModify()`
-
-`db.collection.findOneAndUpdate()`
-
-`db.collection.findOneAndReplace()`
-
-`db.collection.bulkWrite()`
-
-### 5.2 Read
-
-
-
-### 5.3 Update
-
-
-
-### 5.4 Delete
-
